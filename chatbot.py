@@ -47,10 +47,18 @@ keywords = {
 st.title("VRSEC College Chatbot")
 st.write("Ask anything about the college, and the chatbot will provide the information!")
 
-# User Input
-user_input = st.text_input("Enter your question:")
-submit_button = st.button("Submit")
+# Initialize session state for conversation history
+if 'messages' not in st.session_state:
+    st.session_state.messages = [{"role": "assistant", "content": "How can I assist you with information about VRSEC?"}]
 
+# Display chat history
+for msg in st.session_state.messages:
+    if msg["role"] == "user":
+        st.chat_message(msg["role"], avatar="🧑‍💻").write(msg["content"])
+    else:
+        st.chat_message(msg["role"], avatar="🤖").write(msg["content"])
+
+# Define a function to generate a response
 def get_response(question):
     question_str = question.lower().strip()
 
@@ -62,10 +70,12 @@ def get_response(question):
 
     return "I'm sorry, I don't have information on that topic."
 
-# Generate response if user asks a question
-if submit_button and user_input:
-    response = get_response(user_input)
-    st.text_area("Response:", value=response, height=150, max_chars=None, key=None)
+# Input for user query
+if prompt := st.chat_input("Enter your question about VRSEC:"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    st.chat_message("user", avatar="🧑‍💻").write(prompt)
 
-# Deployment
-st.write("This chatbot provides information based on the details of VRSEC.")
+    # Generate response based on the user input
+    response_content = get_response(prompt)
+    st.session_state.messages.append({"role": "assistant", "content": response_content})
+    st.chat_message("assistant", avatar="🤖").write(response_content)
